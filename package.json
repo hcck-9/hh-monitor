@@ -1,6 +1,6 @@
 {
   "name": "hh-monitor",
-  "version": "1.1.0",
+  "version": "1.0.1",
   "description": "An easy web monitor tool",
   "main": "index.js",
   "scripts": {
