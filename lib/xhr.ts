@@ -28,12 +28,14 @@ export function injectXHR() {
         const sendErrorData: ErrorData = {
           kind: 'stability',
           type: 'xhr',
-          errorType: type,
-          pathName: this.loginData.url,
-          status: status + '-' + statusText,
-          duration,
-          response: this.response ? JSON.parse(this.response) : '', // 响应体
-          params: body || '', // 入参
+          info: {
+            errorType: type,
+            pathName: this.loginData.url,
+            status: status + '-' + statusText,
+            duration,
+            response: this.response ? JSON.parse(this.response) : '', // 响应体
+            params: body || '', // 入参
+          },
         };
         console.log(sendErrorData);
       };

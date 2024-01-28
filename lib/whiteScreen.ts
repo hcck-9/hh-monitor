@@ -55,10 +55,12 @@ export function whiteScreen(): void {
       const sendErrorData: ErrorData = {
         kind: 'stability',
         type: 'white',
-        emptyPoints: emptyPoints + '',
-        screen: window.screen.width + 'X' + window.screen.height,
-        viewPoint: window.innerWidth + 'X' + window.innerHeight,
-        selector: getSelector(centerElements[0]),
+        info: {
+          emptyPoints: emptyPoints,
+          screen: window.screen.width + 'X' + window.screen.height,
+          viewPoint: window.innerWidth + 'X' + window.innerHeight,
+          selector: getSelector(centerElements[0]),
+        },
       };
       console.log(sendErrorData);
     }

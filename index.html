@@ -10,6 +10,7 @@
     <div class="xyz">2</div>
     <div class="name">3</div>
     <button>点我！</button>
+    <button class="qwe">点我测试长任务！</button>
     <script>
       function getSelectors(path) {
         // 反转 + 过滤 + 映射 + 拼接
@@ -197,8 +198,140 @@
         });
       }
 
-      blankScreen();
+      // blankScreen();
     </script>
-    <script></script>
+    <script>
+      const formatTime = (time) => new Date(time).getTime();
+
+      function timing() {
+        let FMP, LCP;
+        // 增加一个性能条目的观察者
+        new PerformanceObserver((entryList, observer) => {
+          const perfEntries = entryList.getEntries();
+
+          FMP = perfEntries[0];
+          observer.disconnect(); // 不再观察了
+        }).observe({ entryTypes: ['element '] }); // 观察页面中有意义的元素
+        // 增加一个性能条目的观察者
+        new PerformanceObserver((entryList, observer) => {
+          const perfEntries = entryList.getEntries();
+          const lastEntry = perfEntries[perfEntries.length - 1];
+          LCP = lastEntry;
+          observer.disconnect(); // 不再观察了
+        }).observe({ entryTypes: ['largest-contentful-paint'] }); // 观察页面中最大的元素
+
+        // 刚开始页面内容为空，等页面渲染完成，再去做判断
+        onload(function () {
+          setTimeout(() => {
+            const {
+              fetchStart,
+              connectStart,
+              connectEnd,
+              requestStart,
+              responseStart,
+              responseEnd,
+              domLoading,
+              domInteractive,
+              domContentLoadedEventStart,
+              domContentLoadedEventEnd,
+              loadEventStart,
+            } = window.performance.timing;
+            // 发送时间指标
+            const data = {
+              kind: 'experience', // 用户体验指标
+              type: 'timing', // 统计每个阶段的时间
+              connectTime: connectEnd - connectStart, // TCP连接耗时
+              ttfbTime: responseStart - requestStart, // 首字节到达时间
+              responseTime: responseEnd - responseStart, // response响应耗时
+              parseDOMTime: loadEventStart - domLoading, // DOM解析渲染的时间
+              domContentLoadedTime:
+                domContentLoadedEventEnd - domContentLoadedEventStart, // DOMContentLoaded事件回调耗时
+              timeToInteractive: domInteractive - fetchStart, // 首次可交互时间
+              loadTime: loadEventStart - fetchStart, // 完整的加载时间
+            };
+            console.log(data);
+            // 发送性能指标
+            let FP = performance.getEntriesByName('first-paint')[0];
+            let FCP = performance.getEntriesByName('first-contentful-paint')[0];
+            console.log('FP', FP);
+            console.log('FCP', FCP);
+            console.log('FMP', FMP);
+            console.log('LCP', LCP);
+            const data2 = {
+              kind: 'experience',
+              type: 'paint',
+              firstPaint: FP ? formatTime(FP.startTime) : 0,
+              firstContentPaint: FCP ? formatTime(FCP.startTime) : 0,
+              firstMeaningfulPaint: FMP ? formatTime(FMP.startTime) : 0,
+              largestContentfulPaint: LCP
+                ? formatTime(LCP.renderTime || LCP.loadTime)
+                : 0,
+            };
+            console.log(data2);
+          }, 3000);
+        });
+      }
+
+      // timing();
+    </script>
+    <script>
+      let lastEvent;
+      function getLastEvent() {
+        ['click', 'touchstart', 'mousedown', 'keydown', 'mouseover'].forEach(
+          (eventType) => {
+            document.addEventListener(
+              eventType,
+              (event) => {
+                lastEvent = event;
+                console.log(lastEvent, event);
+              },
+              {
+                capture: true, // 是在捕获阶段还是冒泡阶段执行
+                passive: true, // 默认不阻止默认事件
+              }
+            );
+          }
+        );
+      }
+      // getLastEvent();
+      function longTask() {
+        new PerformanceObserver((entryList) => {
+          entryList.getEntries().forEach((entry) => {
+            if (entry.duration > 100) {
+              console.log(lastEvent);
+              requestIdleCallback(() => {
+                const data = {
+                  kind: 'experience',
+                  type: 'longTask',
+                  eventType: lastEvent.type,
+                  startTime: formatTime(entry.startTime), // 开始时间
+                  duration: formatTime(entry.duration), // 持续时间
+                  selector: lastEvent
+                    ? getSelectorsFromPathsOrTarget(
+                        lastEvent.path || lastEvent.target
+                      )
+                    : '',
+                };
+                console.log(data);
+              });
+            }
+          });
+        }).observe({ entryTypes: ['longtask'] });
+      }
+
+      longTask();
+    </script>
+    <script>
+      const qwe = document.getElementsByClassName('qwe')[0];
+
+      qwe.addEventListener('click', function () {
+        console.log('a');
+        function a() {
+          for (let i = 1; i < 1000000000; i++) {}
+          console.log('b');
+        }
+        a();
+      });
+    </script>
   </body>
 </html>

@@ -18,12 +18,14 @@ export function injectJsError() {
           kind: 'stability',
           // 小类型，这是一个错误
           type: 'error',
-          errorType: 'resourceError',
-          // @ts-ignore
-          filename: event.target.src || event.target.href,
-          // @ts-ignore
-          tagName: event.target.tagName,
-          selector: getSelectorsFromPathsOrTarget(event.target),
+          info: {
+            errorType: 'resourceError',
+            // @ts-ignore
+            filename: event.target.src || event.target.href,
+            // @ts-ignore
+            tagName: event.target.tagName,
+            selector: getSelectorsFromPathsOrTarget(event.target),
+          },
         };
         console.log(sendErrorData);
       } else {
@@ -31,19 +33,21 @@ export function injectJsError() {
         const sendErrorData: ErrorData = {
           kind: 'stability',
           type: 'error',
-          errorType: 'jsError',
-          // 报错信息
-          message: event.message,
-          // 哪个文件报错了
-          filename: event.filename,
-          // 报错的行列位置
-          position: `${event.lineno}:${event.colno}`,
-          stack: getLines(event.error.stack),
-          // 代表最后一个操作的元素
-          selector: lastEvent
-            ? // @ts-ignore
-              getSelectorsFromPathsOrTarget(lastEvent.path)
-            : '',
+          info: {
+            errorType: 'jsError',
+            // 报错信息
+            message: event.message,
+            // 哪个文件报错了
+            filename: event.filename,
+            // 报错的行列位置
+            position: `${event.lineno}:${event.colno}`,
+            stack: getLines(event.error.stack),
+            // 代表最后一个操作的元素
+            selector: lastEvent
+              ? // @ts-ignore
+                getSelectorsFromPathsOrTarget(lastEvent.path)
+              : '',
+          },
         };
         console.log(sendErrorData);
       }
@@ -82,15 +86,17 @@ export function injectJsError() {
       const sendErrorData: ErrorData = {
         kind: 'stability',
         type: 'error',
-        errorType: 'promiseError',
-        message,
-        filename,
-        position: `${line}:${column}`,
-        stack,
-        selector: lastEvent
-          ? // @ts-ignore
-            getSelectorsFromPathsOrTarget(lastEvent.path)
-          : '',
+        info: {
+          errorType: 'promiseError',
+          message,
+          filename,
+          position: `${line}:${column}`,
+          stack,
+          selector: lastEvent
+            ? // @ts-ignore
+              getSelectorsFromPathsOrTarget(lastEvent.path)
+            : '',
+        },
       };
       console.log(sendErrorData);
     },
